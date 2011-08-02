@@ -1,0 +1,62 @@
+div.dokuwiki .yearbox {
+	font-size:12px;
+	font-family:Tahoma;
+    padding:5px;
+}
+div.dokuwiki .yearbox table.left {
+    float:left;
+}
+div.dokuwiki .yearbox table.right {
+    float:right;
+}
+div.dokuwiki .yearbox table {
+	border-width: 1px;
+	border-spacing: 2px;
+	border-style: solid solid solid solid;
+	border-color: #BFBFBF;
+	border-collapse: collapse;
+	background-color: white;
+    margin:0 auto;
+}
+div.dokuwiki .yearbox table th {
+	border-width: 1px;
+	padding:2px 3px;
+	border-style: solid solid solid solid;
+	border-color: #BFBFBF;
+	background-color: #F0F5F7;
+    text-align: center;
+}
+div.dokuwiki .yearbox table tr.yr-header {
+    border-width:2px;
+	border-style: solid none solid none;
+	border-color: #D8D8D8;
+}
+div.dokuwiki .yearbox table td {
+	border-width: 1px;
+	padding: 1px 4px;
+	border-style: solid solid solid solid;
+	border-color: #BFBFBF;
+	background-color: white;
+}
+div.dokuwiki .yearbox table th.wkend {
+    background-color: #D6DBEA;
+}
+div.dokuwiki .yearbox table td.wkend {
+    background-color: #EAF0F0;
+}
+div.dokuwiki .yearbox table th.alt {
+    background-color: #D6DBEA;
+}
+div.dokuwiki .yearbox table th.plain {
+	background:none;
+}
+div.dokuwiki .yearbox a.wikilink2 {
+    border-bottom:0 !important;
+    color:#FC6F4B !important;
+}
+div.dokuwiki .yearbox table td.blank {
+    background-color: #CDD2E2;
+}
+div.dokuwiki .yearbox table td.today {
+    background-color: #FAEAC9;
+}
