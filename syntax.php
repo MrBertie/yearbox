@@ -164,18 +164,21 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
 		// first get start day for each month, and length of month,
         // exact no. of columns needed, and the starting day of week
         for ($mth = $mth_first; $mth <= $mth_last; $mth++) {
-            $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
-            $mth_num = ($mth - 1) % 12 + 1;
-            $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
-            $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
-			$mth_weekday[$mth] = $start;    // weekday in which this month starts
-			$mth_length[$mth] = $len;       // length of this month
+            // only consider displayed months when calculating column size
+            if (empty($opt['months']) || in_array($mth, $opt['months'])) {
+                $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
+                $mth_num = ($mth - 1) % 12 + 1;
+                $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
+                $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
+                $mth_weekday[$mth] = $start;    // weekday in which this month starts
+                $mth_length[$mth] = $len;       // length of this month
 
-            // max number of table columns needed (not including col for months!)
-			$col_max = ($col_max < ($start + $len)) ? $start + $len : $col_max;
-            // find the lowest day of week (i.e. Sun = 0, Mon = 1, etc...)
-            // this determines which day of week to begin column headers with
-			$cal_start = ($cal_start > $start) ? $start : $cal_start;
+                // max number of table columns needed (not including col for months!)
+                $col_max = ($col_max < ($start + $len)) ? $start + $len : $col_max;
+                // find the lowest day of week (i.e. Sun = 0, Mon = 1, etc...)
+                // this determines which day of week to begin column headers with
+                $cal_start = ($cal_start > $start) ? $start : $cal_start;
+            }
 		}
         $col_max -= $cal_start;
 
