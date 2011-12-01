@@ -165,7 +165,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         // exact no. of columns needed, and the starting day of week
         for ($mth = $mth_first; $mth <= $mth_last; $mth++) {
             // only consider displayed months when calculating column size
-            if (empty($opt['months']) || in_array($mth, $opt['months'])) {
+            if (empty($opt['months']) || in_array($mth % 12 + 1, $opt['months'])) {
                 $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
                 $mth_num = ($mth - 1) % 12 + 1;
                 $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
@@ -179,7 +179,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                 // this determines which day of week to begin column headers with
                 $cal_start = ($cal_start > $start) ? $start : $cal_start;
             }
-		}
+        }
         $col_max -= $cal_start;
 
         $cur_mth = $mth_first;
@@ -226,17 +226,17 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                     }
 
                     $is_weekend = ($weekday_num == 0 || $weekday_num == 6) ? true : false;
-                    $wkend_css = ($is_weekend) ? ' class="wkend"' : '';
+                    $day_css = ($is_weekend) ? ' class="wkend"' : '';
 
                     // add the year and week days abbreviations (the header)
                     if ($hdr) {
                         if ($col == 0) $cal .= '<th class="plain">' . $year . '</th>';
                         $h = $day_names[$weekday_num];
-                        $cal .= '<th' . $wkend_css . '>' . $h . '</th>';
+                        $cal .= '<th' . $day_css . '>' . $h . '</th>';
 
                     // otherwise add a day
                     } else {
-                        if (empty($opt['months']) || in_array($mth_num, $opt['months'])) {
+                        if ( ! empty($mth_len)) {
                             // insert day name headers into first column of row
                             if ($col == 0) {
                                 $alt_css = ($cur_mth % 2 == 0) ? ' class="alt"' : '';
@@ -249,7 +249,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                                 $id = $opt['ns'] . ':' . $year . '-' . $month . ':' . $opt['name'] .'-' .
                                                         $year . '-' . $month . '-' . $day;
                                 $current = mktime(0, 0, 0, $month, $day, $year);
-                                if ($current == $today) $wkend_css = ' class="today"';
+                                if ($current == $today) $day_css = ' class="today"';
 
                                 // swap normal link title (popup) for a more useful preview if page exists
                                 if (page_exists($id)) {
@@ -260,7 +260,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                                     $sym = ($conf['userewrite']) ? '?' : '&amp;';
                                     $link = preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
                                 }
-                                $cal .= '<td' . $wkend_css . '>' . $link . '</td>';
+                                $cal .= '<td' . $day_css . '>' . $link . '</td>';
                             } else {
                                 $cal .= '<td class="blank">&nbsp;&nbsp;</td>';
                             }
