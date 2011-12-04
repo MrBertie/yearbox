@@ -212,7 +212,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                 }
                 $cal .= '</tr>';
             }
-            // separater between years in a range
+            // separator between years in a range
             if ($year_num != $last_year) {
                 $cal .= '<tr class="blank"><td></td></tr>';
             }
