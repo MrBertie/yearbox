@@ -25,10 +25,11 @@ div.dokuwiki .yearbox table th {
 	border-color: #BFBFBF;
 	background-color: #F0F5F7;
     text-align: center;
+    color:#666666;
 }
 div.dokuwiki .yearbox table tr.yr-header {
-    border-width:2px;
-	border-style: solid none solid none;
+    border-bottom-width:2px;
+	border-style: none none solid none;
 	border-color: #D8D8D8;
 }
 div.dokuwiki .yearbox table td {
@@ -52,11 +53,20 @@ div.dokuwiki .yearbox table th.plain {
 }
 div.dokuwiki .yearbox a.wikilink2 {
     border-bottom:0 !important;
-    color:#FC6F4B !important;
+    color:#fca77d!important;
 }
 div.dokuwiki .yearbox table td.blank {
     background-color: #CDD2E2;
 }
 div.dokuwiki .yearbox table td.today {
     background-color: #FAEAC9;
+}
+div.dokuwiki .yearbox table tr.blank,
+div.dokuwiki .yearbox table tr.blank td {
+    border:0;
+    background:none;
+    height:5px;
+}
+div.dokuwiki .yearbox table td:hover {
+    background-color:#CDD2E2;
 }

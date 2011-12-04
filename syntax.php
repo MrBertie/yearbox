@@ -113,6 +113,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         return false;
     }
 
+
 	/**
      * Builds a complete HTML calendar of the year given
      * Provides a link to a page for each day of the year, with a popup abstract of page content
@@ -133,59 +134,14 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
 
         $month_names = $this->getLang('yearbox_months');
 		$day_names = $this->getLang('yearbox_days');
-		$mth_weekday = array();     // first day of week of month (0-6) 0=Sun
-		$mth_length = array();		// length of month in days
-		$col_max = 0;
-		$cal_start = 6;
-		$cal = '';
-		$today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
-        $years = explode(',', $opt['year']);
+        $show_all_days = empty($opt['weekdays']);
+        $cal = '';
 
-        if ($opt['recent'] > 0) {
-            // recent days (matching at least no. of recent days given; shows complete months only)
-            $mth_last = (int) date('n');
-            $yr_last = (int) date('Y');
-            $prev_date = $today - ($opt['recent'] * 12 * 60 * 60);
-            $mth_first = (int) date('n', $prev_date);
-            $yr_first = (int) date('Y', $prev_date);
-            $mth_last += ($yr_last - $yr_first) * 12;
-        } elseif (count($years) == 2) {
-            // if user provides two years: first -> last (inclusive)
-            $mth_first = 1;
-            list($yr_first, $yr_last) = $years;
-            $mth_last = 12 + ($yr_last - $yr_first) * 12;
-        } else {
-            // plain old one year calender
-            $mth_first = 1;
-            $mth_last = 12;
-            $yr_first = $yr_last = $opt['year'];
-        }
+        list($years, $first_weekday, $table_cols, $today) = $this->_define_calendar($opt);
+        end($years);
+        $last_year = key($years);
 
-		// first get start day for each month, and length of month,
-        // exact no. of columns needed, and the starting day of week
-        for ($mth = $mth_first; $mth <= $mth_last; $mth++) {
-            // only consider displayed months when calculating column size
-            if (empty($opt['months']) || in_array($mth % 12 + 1, $opt['months'])) {
-                $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
-                $mth_num = ($mth - 1) % 12 + 1;
-                $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
-                $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
-                $mth_weekday[$mth] = $start;    // weekday in which this month starts
-                $mth_length[$mth] = $len;       // length of this month
-
-                // max number of table columns needed (not including col for months!)
-                $col_max = ($col_max < ($start + $len)) ? $start + $len : $col_max;
-                // find the lowest day of week (i.e. Sun = 0, Mon = 1, etc...)
-                // this determines which day of week to begin column headers with
-                $cal_start = ($cal_start > $start) ? $start : $cal_start;
-            }
-        }
-        $col_max -= $cal_start;
-
-        $cur_mth = $mth_first;
-        $year = $yr_first;
-
-        // basic CSS
+        // initial CSS
         $font_css = ($opt['size'] != 0) ? ' style="font-size:' . $opt['size'] .'px;"' : '';
         if ($opt['align'] == 'left') {
             $align = ' class=left';
@@ -196,30 +152,28 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         }
         $cal .= '<div class="yearbox"' . $font_css . '><table' . $align . '><tbody>';
 
-        // year loop
-        do {
-            $hdr = true;
+        foreach ($years as $year_num => $year) {
 
-            // month loop
-            do {
-                if ( ! $hdr) {
-                    $cal .= '<tr>';
-                    $mth_start = $mth_weekday[$cur_mth];
-                    $mth_len = $mth_length[$cur_mth];
-                } else {
-                    $cal .= '<tr class="yr-header">';
-                }
+            // display the year and day-of-week header
+            $cal .= '<tr class="yr-header">';
+            for ($col = 0; $col < $table_cols; $col++) {
+                $weekday_num = ($col + $first_weekday) % 7;       // current day of week as a number
+                if ($col == 0) $cal .= '<th class="plain">' . $year_num . '</th>';
+                $h = $day_names[$weekday_num];
+                $cal .= '<th>' . $h . '</th>';
+            }
+            $cal .= '</tr>';
 
-                $mth_num = ($cur_mth - 1) % 12 + 1;               // current month as number
+            foreach ($year as $mth_num => $month) {
                 $cur_day = 0;
-                $done = false;
-                $next_yr = false;
 
-                // day loop
-                for ($col = 0; $col < $col_max; $col++) {
-                    $weekday_num = ($col + $cal_start) % 7;       // current day of week as a number
+                // days
+                $cal .= '<tr>';
+                for ($col = 0; $col < $table_cols; $col++) {
+                    $weekday_num = ($col + $first_weekday) % 7;       // current day of week as a number
 
-                    if (($cur_day > 0 && $cur_day < $mth_len) || ($col < 7 && $weekday_num == $mth_start)) {
+                    // current day is onlyvalid if within the month's days, and at the correct starting day
+                    if (($cur_day > 0 && $cur_day < $month['len']) || ($col < 7 && $weekday_num == $month['start'])) {
                         $cur_day++;
                     } else {
                         $cur_day = 0;
@@ -228,62 +182,110 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                     $is_weekend = ($weekday_num == 0 || $weekday_num == 6) ? true : false;
                     $day_css = ($is_weekend) ? ' class="wkend"' : '';
 
-                    // add the year and week days abbreviations (the header)
-                    if ($hdr) {
-                        if ($col == 0) $cal .= '<th class="plain">' . $year . '</th>';
-                        $h = $day_names[$weekday_num];
-                        $cal .= '<th' . $day_css . '>' . $h . '</th>';
+                    // insert month name into first column of row
+                    if ($col == 0) {
+                        $alt_css = ($mth_num % 2 == 0) ? ' class="alt"' : '';
+                        $cal .= '<th' . $alt_css . '>' . $month_names[$mth_num - 1] . '</th>';
+                    }
+                    // add a link to the day's page if we are within this month
+                    if ($cur_day > 0 && ($show_all_days || in_array($weekday_num, $opt['weekdays']))) {
+                        $day_fmt = sprintf("%02d", $cur_day);
+                        $month_fmt = sprintf("%02d",$mth_num);
+                        $id = $opt['ns'] . ':' . $year_num. '-' . $month_fmt . ':' . $opt['name'] .'-' .
+                                                $year_num . '-' . $month_fmt . '-' . $day_fmt;
+                        $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
+                        if ($current == $today) $day_css = ' class="today"';
 
-                    // otherwise add a day
-                    } else {
-                        if ( ! empty($mth_len)) {
-                            // insert day name headers into first column of row
-                            if ($col == 0) {
-                                $alt_css = ($cur_mth % 2 == 0) ? ' class="alt"' : '';
-                                $cal .= '<th' . $alt_css . '>' . $month_names[$mth_num - 1] . '</th>';
-                            }
-                            // add a link to the day's page if we are within this month
-                            if ($cur_day > 0 && (empty($opt['weekdays']) || in_array($weekday_num, $opt['weekdays']))) {
-                                $day = sprintf("%02d", $cur_day);
-                                $month = sprintf("%02d",$mth_num);
-                                $id = $opt['ns'] . ':' . $year . '-' . $month . ':' . $opt['name'] .'-' .
-                                                        $year . '-' . $month . '-' . $day;
-                                $current = mktime(0, 0, 0, $month, $day, $year);
-                                if ($current == $today) $day_css = ' class="today"';
-
-                                // swap normal link title (popup) for a more useful preview if page exists
-                                if (page_exists($id)) {
-                                    $link = $this->_wikilink_preview_popup($id, $day);
-                                } else {
-                                    $link = html_wikilink($id, $day);
-                                    // skip the "do you want to create this page" bit
-                                    $sym = ($conf['userewrite']) ? '?' : '&amp;';
-                                    $link = preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
-                                }
-                                $cal .= '<td' . $day_css . '>' . $link . '</td>';
-                            } else {
-                                $cal .= '<td class="blank">&nbsp;&nbsp;</td>';
-                            }
+                        // swap normal link title (popup) for a more useful preview if page exists
+                        if (page_exists($id)) {
+                            $link = $this->_wikilink_preview_popup($id, $day_fmt);
+                        } else {
+                            $link = html_wikilink($id, $day_fmt);
+                            // skip the "do you want to create this page" bit
+                            $sym = ($conf['userewrite']) ? '?' : '&amp;';
+                            $link = preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
                         }
+                        $cal .= '<td' . $day_css . '>' . $link . '</td>';
+                    } else {
+                        $cal .= '<td class="blank">&nbsp;&nbsp;&nbsp;</td>';
                     }
                 }
                 $cal .= '</tr>';
-                if ($hdr) {
-                    $hdr = false;
-                    continue;
-                }
-
-                $done = ($cur_mth == $mth_last);
-                $next_yr = ($mth_num == 12);
-                $cur_mth++;
-            } while ( ! $done && ! $next_yr);
-
-            $year++;
-        } while ( ! $done);
+            }
+            // separater between years in a range
+            if ($year_num != $last_year) {
+                $cal .= '<tr class="blank"><td></td></tr>';
+            }
+        }
 
         $cal .= '</tbody></table></div><div class="clearer"></div>';
 		return $cal;
 	}
+
+
+    /**
+    * establish list of valid months and days, ready for building the visible calendar
+    *
+    * @param array $opt    users options
+    */
+    private function _define_calendar($opt) {
+        $years = array();
+
+		$table_cols = 0;
+		$first_weekday = 6;
+
+        $year_range = explode(',', $opt['year']);
+		$today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+
+        // work out the date range first
+        if ($opt['recent'] > 0) {
+            // recent days (matching at least no. of recent days given; shows complete months only)
+            $mth_last = (int) date('n');
+            $yr_last = (int) date('Y');
+            $prev_date = $today - ($opt['recent'] * 12 * 60 * 60);
+            $mth_first = (int) date('n', $prev_date);
+            $yr_first = (int) date('Y', $prev_date);
+            $mth_last += ($yr_last - $yr_first) * 12;
+        } elseif (count($year_range) == 2) {
+            // if user provides two years: first -> last (inclusive)
+            $mth_first = 1;
+            list($yr_first, $yr_last) = $year_range;
+            $mth_last = 12 + ($yr_last - $yr_first) * 12;
+        } else {
+            // plain old one year calender
+            $mth_first = 1;
+            $mth_last = 12;
+            $yr_first = $yr_last = $opt['year'];
+        }
+        $show_all_mths = empty($opt['months']);
+
+        // first get start day for each month, and length of month,
+        // exact no. of columns needed, and the starting day of week
+        for ($mth = $mth_first; $mth <= $mth_last; $mth++) {
+            $mth_num = ($mth - 1) % 12 + 1; // real month number (1-12)
+
+            // only consider displayed months when calculating column size
+            if ($show_all_mths || in_array($mth_num, $opt['months'])) {
+                $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
+                $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
+                $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
+
+                // save the first weekday (0-6; 0=Sun) and length (days) of this month
+                $years[$year][$mth_num] = array('start' => $start, 'len' => $len);
+
+                // max number of table columns needed (not including col for months!)
+                $table_cols = ($table_cols < ($start + $len)) ? $start + $len : $table_cols;
+
+                // find the lowest day of week (i.e. Sun = 0, Mon = 1, etc...)
+                // this determines which day of week to begin column headers with
+                $first_weekday = ($first_weekday > $start) ? $start : $first_weekday;
+            }
+        }
+        // final total columns needed in HTML table
+        $table_cols -= $first_weekday;
+
+        return array($years, $first_weekday, $table_cols, $today);
+    }
 
     private function _wikilink_preview_popup($id, $name) {
         // swap normal link title (popup) for a more useful preview
