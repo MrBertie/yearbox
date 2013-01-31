@@ -4,7 +4,7 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Symon Bent: <symonbent [at] gmail [dot] com>
- *
+ * @author     Max Westen: <max [at] dlmax [dot] org> 
  *
  */
 
@@ -56,14 +56,14 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         $opt = array();
 
         // default options
-        $opt['ns'] = $INFO['namespace'];   // this namespace
-        $opt['size'] = 12;                 // 12px font size
-        $opt['name'] = 'day';              // a boring default page name
-        $opt['year'] = date('Y');          // this year
-        $opt['recent'] = false;            // special 1-2 row 'recent pages' view...
-        $opt['months'] = array();          // months to be displayed (csv list), e.g. 1,2,3,4... 1=Sun
-        $opt['weekdays'] = array();        // weekdays which should have links (csv links)... 1=Jan
-        $opt['align'] = '';                // default is centred
+        $opt['ns'] = ($this->getConf('namespace')) ? $this->getConf('namespace') : $INFO['namespace']; // this namespace
+        $opt['size'] = $this->getConf('font_size'); // 12px font size
+        $opt['name'] = $this->getConf('page_name'); // a boring default page name
+        $opt['year'] = date('Y');                   // this year
+        $opt['recent'] = false;                     // special 1-2 row 'recent pages' view...
+        $opt['months'] = array();                   // months to be displayed (csv list), e.g. 1,2,3,4... 1=Sun
+        $opt['weekdays'] = array();                 // weekdays which should have links (csv links)... 1=Jan
+        $opt['align'] =  $this->getConf('align');   // default is centred
 
 		$match = substr($match, 10, -2);
         $args = explode(';', $match);
@@ -190,9 +190,21 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                     // add a link to the day's page if we are within this month
                     if ($cur_day > 0 && ($show_all_days || in_array($weekday_num, $opt['weekdays']))) {
                         $day_fmt = sprintf("%02d", $cur_day);
-                        $month_fmt = sprintf("%02d",$mth_num);
-                        $id = $opt['ns'] . ':' . $year_num. '-' . $month_fmt . ':' . $opt['name'] .'-' .
-                                                $year_num . '-' . $month_fmt . '-' . $day_fmt;
+                        $month_fmt = sprintf("%02d",$mth_num);                      
+                        $entryname = (empty($opt['name'])) ? '' : $opt['name'] .'-';
+                        switch ($this->getConf('namestructure')) {
+                          case 0:
+                            $id = $opt['ns'] . ':' . $year_num. '-' . $month_fmt . ':' . $entryname .
+                                $year_num . '-' . $month_fmt . '-' . $day_fmt;
+                            break;
+                          case 1:
+                            $id = $opt['ns'] . ':' . $year_num. ':' . $month_fmt . ':' . $entryname .
+                                $year_num . '-' . $month_fmt . '-' . $day_fmt;                            
+                            break;
+                          case 2:
+                            $id = $opt['ns'] . ':' . $year_num. ':' . $month_fmt . ':' . $day_fmt;                            
+                            break;
+                        }
                         $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
                         if ($current == $today) $day_css = ' class="today"';
 
@@ -203,7 +215,25 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                             $link = html_wikilink($id, $day_fmt);
                             // skip the "do you want to create this page" bit
                             $sym = ($conf['userewrite']) ? '?' : '&amp;';
-                            $link = preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
+                            switch ($this->getConf('np_date_format')) {
+                              case 0:
+                                $titel = $year_num."-".$month_fmt."-".$day_fmt;
+                                break;
+                              case 1:
+                                $titel = $year_num."-".$day_fmt."-".$month_fmt;
+                                break;
+                              case 2:
+                                $titel = $month_fmt."-".$day_fmt."-".$year_num;
+                                break;
+                              case 3:
+                                $titel = $day_fmt."-".$month_fmt."-".$year_num;
+                                break;
+                            }
+                            
+                            $newpage_t = "&newpagetemplate=:pagetemplates:journaltemplate";
+                            $newpage_v = ($this->getConf('np_date')) ? "&newpagevars=@YBDATE@," . $titel : '';
+                            $newpage = ($this->getConf('newpage')) ? $newpage_t . $newpage_v : '';
+                            $link = preg_replace('/\" class/', $sym . 'do=edit' . $newpage . '" class', $link, 1);
                         }
                         $cal .= '<td' . $day_css . '>' . $link . '</td>';
                     } else {
