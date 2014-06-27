@@ -1,7 +1,7 @@
 base    yearbox
 author  Symon Bent
 email   hendrybadao@gmail.com
-date    2011-12-04
+date    2012-03-03
 name    Yearbox Plugin
 desc    Builds a complete HTML calendar for the given year, with a link to create a new page for each day of the year. Existing pages will have a tooltip showing a preview of the page content.
 url     http://wiki.splitbrain.org/plugin:yearbox
