@@ -51,7 +51,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
      * E.g.: {{yearbox>year=2010;name=journal;size=12;ns=diary}}
      *
      */
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         global $INFO;
         $opt = array();
 
@@ -105,7 +105,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
     /**
      * Create output
      */
-    function render($mode, &$renderer, $opt) {
+    function render($mode, Doku_Renderer $renderer, $opt) {
         if ($mode == 'xhtml') {
             $renderer->doc .= $this->build_calendar($opt);
             return true;
