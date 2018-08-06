@@ -8,42 +8,47 @@
  *
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once (DOKU_PLUGIN.'syntax.php');
-require_once (DOKU_INC . 'inc/html.php');
-
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class
  */
-class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
+{
 
     /**
      * What kind of syntax is this?
      */
-    function getType() { return 'substition'; }
-    function getPType() { return 'block'; }
+    public function getType()
+    {
+        return 'substition';
+    }
+    public function getPType()
+    {
+        return 'block';
+    }
 
     /**
      * What modes are allowed within this mode?
      */
-    function getAllowedTypes() {
+    public function getAllowedTypes()
+    {
         return array('substition','protected','disabled','formatting');
     }
 
     /**
      * What position in the sort order?
      */
-    function getSort(){
+    public function getSort()
+    {
         return 125;
     }
 
     /**
      * Connect pattern to lexer
      */
-    function connectTo($mode) {
-      	$this->Lexer->addSpecialPattern('{{yearbox>.*?}}', $mode, 'plugin_yearbox');
+    public function connectTo($mode)
+    {
+        $this->Lexer->addSpecialPattern('{{yearbox>.*?}}', $mode, 'plugin_yearbox');
     }
 
     /**
@@ -51,7 +56,8 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
      * E.g.: {{yearbox>year=2010;name=journal;size=12;ns=diary}}
      *
      */
-    function handle($match, $state, $pos, Doku_Handler $handler) {
+    public function handle($match, $state, $pos, Doku_Handler $handler)
+    {
         global $INFO;
         $opt = array();
 
@@ -65,7 +71,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         $opt['weekdays'] = array();        // weekdays which should have links (csv links)... 1=Jan
         $opt['align'] = '';                // default is centred
 
-		$match = substr($match, 10, -2);
+        $match = substr($match, 10, -2);
         $args = explode(';', $match);
         foreach ($args as $arg) {
             list($key, $value) = explode('=', $arg);
@@ -99,13 +105,14 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                     break;
             }
         }
-		return $opt;
+        return $opt;
     }
 
     /**
      * Create output
      */
-    function render($mode, Doku_Renderer $renderer, $opt) {
+    public function render($mode, Doku_Renderer $renderer, $opt)
+    {
         if ($mode == 'xhtml') {
             $renderer->doc .= $this->build_calendar($opt);
             return true;
@@ -114,7 +121,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
     }
 
 
-	/**
+    /**
      * Builds a complete HTML calendar of the year given
      * Provides a link to a page for each day of the year, with a popup abstract of page content
      *
@@ -129,11 +136,12 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
      * }
      * @return string   Complete marked up calendar table
      */
-	function build_calendar($opt) {
+    private function build_calendar($opt)
+    {
         global $conf;
 
         $month_names = $this->getLang('yearbox_months');
-		$day_names = $this->getLang('yearbox_days');
+        $day_names = $this->getLang('yearbox_days');
         $show_all_days = empty($opt['weekdays']);
         $cal = '';
 
@@ -153,7 +161,6 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         $cal .= '<div class="yearbox"' . $font_css . '><table' . $align . '><tbody>';
 
         foreach ($years as $year_num => $year) {
-
             // display the year and day-of-week header
             $cal .= '<tr class="yr-header">';
             for ($col = 0; $col < $table_cols; $col++) {
@@ -190,7 +197,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
                     // add a link to the day's page if we are within this month
                     if ($cur_day > 0 && ($show_all_days || in_array($weekday_num, $opt['weekdays']))) {
                         $day_fmt = sprintf("%02d", $cur_day);
-                        $month_fmt = sprintf("%02d",$mth_num);
+                        $month_fmt = sprintf("%02d", $mth_num);
                         $id = $opt['ns'] . ':' . $year_num. '-' . $month_fmt . ':' . $opt['name'] .'-' .
                                                 $year_num . '-' . $month_fmt . '-' . $day_fmt;
                         $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
@@ -219,8 +226,8 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         }
 
         $cal .= '</tbody></table></div><div class="clearer"></div>';
-		return $cal;
-	}
+        return $cal;
+    }
 
 
     /**
@@ -228,14 +235,15 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
     *
     * @param array $opt    users options
     */
-    private function _define_calendar($opt) {
+    private function _define_calendar($opt)
+    {
         $years = array();
 
-		$table_cols = 0;
-		$first_weekday = 6;
+        $table_cols = 0;
+        $first_weekday = 6;
 
         $year_range = explode(',', $opt['year']);
-		$today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
 
         // work out the date range first
         if ($opt['recent'] > 0) {
@@ -287,11 +295,12 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin {
         return array($years, $first_weekday, $table_cols, $today);
     }
 
-    private function _wikilink_preview_popup($id, $name) {
+    private function _wikilink_preview_popup($id, $name)
+    {
         // swap normal link title (popup) for a more useful preview
         $link = html_wikilink($id, $name);
         $meta = p_get_metadata($id, false, true);
-        $abstract = $meta['description']['abstract'] . '... ' . 'Edited: ' . date('Y-M-d',$meta['date']['modified']);
+        $abstract = $meta['description']['abstract'] . '... ' . 'Edited: ' . date('Y-M-d', $meta['date']['modified']);
         $preview = str_replace("\n", '  ', $preview);
         $preview = htmlentities($abstract, ENT_QUOTES, 'UTF-8');
         $link = preg_replace('/title=\".+?\"/', 'title="' . $preview . '"', $link, 1);
