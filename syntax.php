@@ -114,7 +114,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
     public function render($mode, Doku_Renderer $renderer, $opt)
     {
         if ($mode == 'xhtml') {
-            $renderer->doc .= $this->build_calendar($opt);
+            $renderer->doc .= $this->buildCalendar($opt);
             return true;
         }
         return false;
@@ -136,7 +136,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
      * }
      * @return string   Complete marked up calendar table
      */
-    private function build_calendar($opt)
+    private function buildCalendar($opt)
     {
         global $conf;
 
@@ -145,7 +145,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $show_all_days = empty($opt['weekdays']);
         $cal = '';
 
-        list($years, $first_weekday, $table_cols, $today) = $this->_define_calendar($opt);
+        list($years, $first_weekday, $table_cols, $today) = $this->defineCalendar($opt);
         end($years);
         $last_year = key($years);
 
@@ -205,7 +205,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
 
                         // swap normal link title (popup) for a more useful preview if page exists
                         if (page_exists($id)) {
-                            $link = $this->_wikilink_preview_popup($id, $day_fmt);
+                            $link = $this->wikilinkPreviewPopup($id, $day_fmt);
                         } else {
                             $link = html_wikilink($id, $day_fmt);
                             // skip the "do you want to create this page" bit
@@ -235,7 +235,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
     *
     * @param array $opt    users options
     */
-    private function _define_calendar($opt)
+    private function defineCalendar($opt)
     {
         $years = array();
 
@@ -295,7 +295,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         return array($years, $first_weekday, $table_cols, $today);
     }
 
-    private function _wikilink_preview_popup($id, $name)
+    private function wikilinkPreviewPopup($id, $name)
     {
         // swap normal link title (popup) for a more useful preview
         $link = html_wikilink($id, $name);
