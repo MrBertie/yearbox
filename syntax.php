@@ -22,6 +22,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
     {
         return 'substition';
     }
+
     public function getPType()
     {
         return 'block';
@@ -32,7 +33,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
      */
     public function getAllowedTypes()
     {
-        return array('substition','protected','disabled','formatting');
+        return ['substition', 'protected', 'disabled', 'formatting'];
     }
 
     /**
@@ -59,7 +60,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
     public function handle($match, $state, $pos, Doku_Handler $handler)
     {
         global $INFO;
-        $opt = array();
+        $opt = [];
 
         // default options
         $opt['ns'] = $INFO['namespace'];   // this namespace
@@ -67,8 +68,8 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $opt['name'] = 'day';              // a boring default page name
         $opt['year'] = date('Y');          // this year
         $opt['recent'] = false;            // special 1-2 row 'recent pages' view...
-        $opt['months'] = array();          // months to be displayed (csv list), e.g. 1,2,3,4... 1=Sun
-        $opt['weekdays'] = array();        // weekdays which should have links (csv links)... 1=Jan
+        $opt['months'] = [];               // months to be displayed (csv list), e.g. 1,2,3,4... 1=Sun
+        $opt['weekdays'] = [];             // weekdays which should have links (csv links)... 1=Jan
         $opt['align'] = '';                // default is centred
 
         $match = substr($match, 10, -2);
@@ -87,7 +88,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
                     $opt['size'] = $value;
                     break;
                 case 'ns':
-                    $opt['ns'] = (strpos($value, ':') === false) ?  ':' . $value : $value;
+                    $opt['ns'] = (strpos($value, ':') === false) ? ':' . $value : $value;
                     break;
                 case 'recent':
                     $opt['recent'] = ($value > 0) ? abs($value) : 0;
@@ -99,7 +100,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
                     $opt['weekdays'] = explode(',', $value);
                     break;
                 case 'align':
-                    if (in_array($value, array('left', 'right'))) {
+                    if (in_array($value, ['left', 'right'])) {
                         $opt['align'] = $value;
                     }
                     break;
@@ -126,14 +127,16 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
      * Provides a link to a page for each day of the year, with a popup abstract of page content
      *
      * $opt = array(
-     * @param string $year      build calendar for one year (2011), or range of years (2011,2013)
-     * @param string $name      prefix for new page name, e.g diary, journal, day
-     * @param int    $size      font size to use
-     * @param string $ns        root namespace for new page names
-     * @param int    $recent    previous days that must be visible
-     * @param array $months    which months are visible (1-12), 1=Jan, 2=Feb, etc
-     * @param array $weekdays  which weekdays should have links (1-7), 1=Sun, 2=Mon, etc...
-     * }
+     *
+     * @param string $year     build calendar for one year (2011), or range of years (2011,2013)
+     * @param string $name     prefix for new page name, e.g diary, journal, day
+     * @param int    $size     font size to use
+     * @param string $ns       root namespace for new page names
+     * @param int    $recent   previous days that must be visible
+     * @param array  $months   which months are visible (1-12), 1=Jan, 2=Feb, etc
+     * @param array  $weekdays which weekdays should have links (1-7), 1=Sun, 2=Mon, etc...
+     *                         }
+     *
      * @return string   Complete marked up calendar table
      */
     private function buildCalendar($opt)
@@ -150,7 +153,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $last_year = key($years);
 
         // initial CSS
-        $font_css = ($opt['size'] != 0) ? ' style="font-size:' . $opt['size'] .'px;"' : '';
+        $font_css = ($opt['size'] != 0) ? ' style="font-size:' . $opt['size'] . 'px;"' : '';
         if ($opt['align'] == 'left') {
             $align = ' class=left';
         } elseif ($opt['align'] == 'right') {
@@ -165,7 +168,9 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
             $cal .= '<tr class="yr-header">';
             for ($col = 0; $col < $table_cols; $col++) {
                 $weekday_num = ($col + $first_weekday) % 7;       // current day of week as a number
-                if ($col == 0) $cal .= '<th class="plain">' . $year_num . '</th>';
+                if ($col == 0) {
+                    $cal .= '<th class="plain">' . $year_num . '</th>';
+                }
                 $h = $day_names[$weekday_num];
                 $cal .= '<th>' . $h . '</th>';
             }
@@ -198,10 +203,12 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
                     if ($cur_day > 0 && ($show_all_days || in_array($weekday_num, $opt['weekdays']))) {
                         $day_fmt = sprintf("%02d", $cur_day);
                         $month_fmt = sprintf("%02d", $mth_num);
-                        $id = $opt['ns'] . ':' . $year_num. '-' . $month_fmt . ':' . $opt['name'] .'-' .
-                                                $year_num . '-' . $month_fmt . '-' . $day_fmt;
+                        $id = $opt['ns'] . ':' . $year_num . '-' . $month_fmt . ':' . $opt['name'] . '-' .
+                            $year_num . '-' . $month_fmt . '-' . $day_fmt;
                         $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
-                        if ($current == $today) $day_css = ' class="today"';
+                        if ($current == $today) {
+                            $day_css = ' class="today"';
+                        }
 
                         // swap normal link title (popup) for a more useful preview if page exists
                         if (page_exists($id)) {
@@ -231,13 +238,13 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
 
 
     /**
-    * establish list of valid months and days, ready for building the visible calendar
-    *
-    * @param array $opt    users options
-    */
+     * establish list of valid months and days, ready for building the visible calendar
+     *
+     * @param array $opt users options
+     */
     private function defineCalendar($opt)
     {
-        $years = array();
+        $years = [];
 
         $table_cols = 0;
         $first_weekday = 6;
@@ -248,11 +255,11 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         // work out the date range first
         if ($opt['recent'] > 0) {
             // recent days (matching at least no. of recent days given; shows complete months only)
-            $mth_last = (int) date('n');
-            $yr_last = (int) date('Y');
+            $mth_last = (int)date('n');
+            $yr_last = (int)date('Y');
             $prev_date = $today - ($opt['recent'] * 12 * 60 * 60);
-            $mth_first = (int) date('n', $prev_date);
-            $yr_first = (int) date('Y', $prev_date);
+            $mth_first = (int)date('n', $prev_date);
+            $yr_first = (int)date('Y', $prev_date);
             $mth_last += ($yr_last - $yr_first) * 12;
         } elseif (count($year_range) == 2) {
             // if user provides two years: first -> last (inclusive)
@@ -279,7 +286,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
                 $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
 
                 // save the first weekday (0-6; 0=Sun) and length (days) of this month
-                $years[$year][$mth_num] = array('start' => $start, 'len' => $len);
+                $years[$year][$mth_num] = ['start' => $start, 'len' => $len];
 
                 // max number of table columns needed (not including col for months!)
                 $table_cols = ($table_cols < ($start + $len)) ? $start + $len : $table_cols;
@@ -292,7 +299,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         // final total columns needed in HTML table
         $table_cols -= $first_weekday;
 
-        return array($years, $first_weekday, $table_cols, $today);
+        return [$years, $first_weekday, $table_cols, $today];
     }
 
     private function wikilinkPreviewPopup($id, $name)
