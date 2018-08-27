@@ -195,7 +195,19 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         return $cal;
     }
 
-
+    /**
+     * Get the HTML for one table-row, representing one month
+     *
+     * @param $month
+     * @param $mth_num
+     * @param $opt
+     * @param $year_num
+     * @param $table_cols
+     * @param $first_weekday
+     * @param $today
+     *
+     * @return string
+     */
     protected function getMonthHTML(
         $month,
         $mth_num,
@@ -267,6 +279,8 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
     }
 
     /**
+     * Determine if the given weekday should be printed or be an empty cell
+     *
      * @param $weekday_num
      * @param $opt
      *
@@ -280,6 +294,13 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         return in_array($weekday_num, $opt['weekdays']);
     }
 
+    /**
+     * Get the HTML for a header cell with the month name
+     *
+     * @param $mth_num
+     *
+     * @return string
+     */
     protected function getMonthNameHTML($mth_num)
     {
         $month_names = $this->getLang('yearbox_months');
@@ -287,6 +308,11 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         return '<th' . $alt_css . '>' . $month_names[$mth_num - 1] . '</th>';
     }
 
+    /**
+     * Get the HTML for an empty cell
+     *
+     * @return string
+     */
     protected function getEmptyCellHTML()
     {
         return '<td class="blank">&nbsp;&nbsp;&nbsp;</td>';
