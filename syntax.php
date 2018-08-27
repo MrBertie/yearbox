@@ -8,6 +8,8 @@
  *
  */
 
+use dokuwiki\plugin\yearbox\services\pageNameStrategies\PageNameStrategy;
+
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class
@@ -245,8 +247,8 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $day_css = ($is_weekend) ? ' class="wkend"' : '';
         $day_fmt = sprintf("%02d", $cur_day);
         $month_fmt = sprintf("%02d", $mth_num);
-        $id = $opt['ns'] . ':' . $year_num . '-' . $month_fmt . ':' . $opt['name'] . '-' .
-            $year_num . '-' . $month_fmt . '-' . $day_fmt;
+        $pagenameService = PageNameStrategy::getPagenameStategy($this->getConf('namestructure'));
+        $id = $pagenameService->getPageId($opt['ns'], $year_num, $month_fmt, $day_fmt, $opt['name']);
         $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
         if ($current == $today) {
             $day_css = ' class="today"';
