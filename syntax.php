@@ -389,8 +389,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         // swap normal link title (popup) for a more useful preview
         $link = html_wikilink($id, $name);
         $meta = p_get_metadata($id, false, true);
-        $abstract = $meta['description']['abstract'] . '... ' . 'Edited: ' . date('Y-M-d', $meta['date']['modified']);
-        $preview = str_replace("\n", '  ', $preview);
+        $abstract = $meta['description']['abstract'] . '… ' . "\nEdited: " . date('Y-M-d', $meta['date']['modified']);
         $preview = htmlentities($abstract, ENT_QUOTES, 'UTF-8');
         $link = preg_replace('/title=\".+?\"/', 'title="' . $preview . '"', $link, 1);
         return $link;
