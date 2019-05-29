@@ -12,4 +12,3 @@ $lang['yearbox_months'] = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
 // week begins on Sunday in PHP...
 $lang['yearbox_days'] = "SMTWTFS";
-?>

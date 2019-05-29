@@ -12,4 +12,3 @@ $lang['yearbox_months'] = array('Janvier', 'Février', 'Mars', 'Avril', 'Mai', '
                                 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre');
 // week begins on Sunday in PHP... càd Dimanche
 $lang['yearbox_days'] = "DLMMJVS";
-?>
