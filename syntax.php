@@ -303,7 +303,20 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
      */
     protected function getMonthNameHTML($mth_num)
     {
-        $month_names = $this->getLang('yearbox_months');
+        $month_names = [
+            $this->getLang('yearbox_months_jan'),
+            $this->getLang('yearbox_months_feb'),
+            $this->getLang('yearbox_months_mar'),
+            $this->getLang('yearbox_months_apr'),
+            $this->getLang('yearbox_months_may'),
+            $this->getLang('yearbox_months_jun'),
+            $this->getLang('yearbox_months_jul'),
+            $this->getLang('yearbox_months_aug'),
+            $this->getLang('yearbox_months_sep'),
+            $this->getLang('yearbox_months_oct'),
+            $this->getLang('yearbox_months_nov'),
+            $this->getLang('yearbox_months_dev'),
+        ];
         $alt_css = ($mth_num % 2 == 0) ? ' class="alt"' : '';
         return '<th' . $alt_css . '>' . $month_names[$mth_num - 1] . '</th>';
     }
